@@ -97,43 +97,26 @@
     });
   };
 
-  // Produce a duplicate-free version of the array.
-  _.uniq = function(array, isSorted, iterator) {
-    if(iterator !== undefined) {
-      var result = [];
-      var mapped  = _.map(array, iterator);
-      console.log("mapped:", mapped);
-      var mappedSet = [...new Set(mapped)];
-      console.log("mappedSet:", mappedSet);
-      for (var i = 0; i < array.length; i++) {
-        if (iterator[i] === mappedSet[i]) {
-          if (i >= mapped.length) {
-            break;
-          }
-          result.push(iterator[i]);
+  _.uniq = function(array, isSorted, iterator = _.identity) {
+    let result = [];
+    let unique = [];
+
+    if(isSorted) {
+      _.each(array, function(ele) {
+        if(_.indexOf(unique, iterator(ele)) === -1) {
+          unique.push(iterator(ele));
+          result.push(ele);
         }
-      }
+      });
     } else {
-      var result = [...new Set(array)];
+      _.each(array, function(ele) {
+        if(_.indexOf(result, iterator(ele)) === -1) {
+          result.push(ele);
+        }
+      });
     }
-
-
-
-    // let result = [];
-    // let unique = [];
-    // if(isSorted) {
-    //   _.each(array, function(ele) {
-    //     _.each(unique, function(ele) {
-    //       unique.push(iterator(ele));
-    //       result.push(ele);
-    //     })
-    //   })
-    // } else {
-
-    // }
     return result;
   };
-
 
   // Return the results of applying an iterator to each element.
   _.map = function(collection, iterator) {
@@ -186,6 +169,19 @@
   //   }); // should be 5, regardless of the iterator function passed in
   //          No accumulator is given so the first element is used.
   _.reduce = function(collection, iterator, accumulator) {
+
+    if(accumulator === undefined) {
+      accumulator = collection[0];
+      _.each(collection.slice(1), function(ele) {
+        accumulator = iterator(accumulator, ele);
+      });
+    } else {
+      _.each(collection, function(ele) {
+        accumulator = iterator(accumulator, ele);
+      });
+    }
+
+    return accumulator;
   };
 
   // Determine if the array or object contains a given value (using `===`).
@@ -202,16 +198,24 @@
 
 
   // Determine whether all of the elements match a truth test.
-  _.every = function(collection, iterator) {
+  _.every = function(collection, iterator = _.identity) {
     // TIP: Try re-using reduce() here.
+    return _.reduce(collection, function(acc, curr) {
+      if (!acc) {
+        return false;
+      }
+      return Boolean(iterator(curr));
+    }, true);
   };
 
   // Determine whether any of the elements pass a truth test. If no iterator is
   // provided, provide a default one
-  _.some = function(collection, iterator) {
+  _.some = function(collection, iterator = _.identity) {
     // TIP: There's a very clever way to re-use every() here.
+    return !_.every(collection, function(ele) {
+      return !iterator(ele);
+    });
   };
-
 
   /**
    * OBJECTS
@@ -232,11 +236,25 @@
   //     bla: "even more stuff"
   //   }); // obj1 now contains key1, key2, key3 and bla
   _.extend = function(obj) {
+    _.each(arguments, function(source) {
+      _.each(source, function(value, key) {
+        obj[key] = value;
+      });
+    });
+    return obj;
   };
 
   // Like extend, but doesn't ever overwrite a key that already
   // exists in obj
   _.defaults = function(obj) {
+    _.each(arguments, function(source) {
+      _.each(source, function(value, key) {
+        if (obj[key] === undefined) {
+          obj[key] = value;
+        }
+      });
+    });
+    return obj;
   };
 
 
@@ -280,6 +298,14 @@
   // already computed the result for the given argument and return that value
   // instead if possible.
   _.memoize = function(func) {
+    let cache = {};
+    return function() {
+      let args = JSON.stringify(arguments);
+      if(cache[args] === undefined) {
+        cache[args] = func.apply(this, arguments);
+      }
+      return cache[args];
+    };
   };
 
   // Delays a function for the given number of milliseconds, and then calls
@@ -289,8 +315,8 @@
   // parameter. For example _.delay(someFunction, 500, 'a', 'b') will
   // call someFunction('a', 'b') after 500ms
   _.delay = function(func, wait) {
+    return setTimeout(...arguments);
   };
-
 
   /**
    * ADVANCED COLLECTION OPERATIONS
@@ -303,8 +329,17 @@
   // input array. For a tip on how to make a copy of an array, see:
   // http://mdn.io/Array.prototype.slice
   _.shuffle = function(array) {
-  };
+    let result = [];
+    let copy = array.slice();
+    let randomIdx;
 
+    while(copy.length > 0) {
+      randomIdx = Math.floor(Math.random() * copy.length);
+      result.push(copy[randomIdx]);
+      copy.splice(randomIdx,1);
+    }
+    return result;
+  };
 
   /**
    * ADVANCED
