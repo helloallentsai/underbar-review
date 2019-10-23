@@ -41,7 +41,7 @@
     if (n === 0) {
       return [];
     }
-    return n === undefined ? array[array.length-1] : array.slice(-n);
+    return n === undefined ? array[array.length - 1] : array.slice(-n);
   };
 
   // Call iterator(value, key, collection) for each element of collection.
@@ -379,6 +379,22 @@
   // Takes an arbitrary number of arrays and produces an array that contains
   // every item shared between all the passed-in arrays.
   _.intersection = function() {
+    let args = [...arguments];
+    let cache = {};
+
+    _.each(args, function(arr) {
+      _.each(arr, function(elem) {
+        cache[elem] === undefined ? cache[elem] = 1 : cache[elem] += 1;
+      });
+    });
+
+    let result = [];
+    _.each(cache, function(value, key) {
+      if(value === args.length) {
+        result.push(key);
+      }
+    });
+    return result;
   };
 
   // Take the difference between one array and a number of other arrays.
