@@ -375,13 +375,13 @@
   // Hint: Use Array.isArray to check if something is an array
   _.flatten = function(arr) {
     let result = [];
-    for (var i = 0; i < arr.length; i++) {
-      if (Array.isArray(arr[i])) {
-        result = result.concat(_.flatten(arr[i]));
+    _.each(arr, function(elem) {
+      if(Array.isArray(elem)) {
+        result = result.concat(_.flatten(elem));
       } else {
-        result.push(arr[i]);
+        result.push(elem);
       }
-    }
+    });
     return result;
   };
 
