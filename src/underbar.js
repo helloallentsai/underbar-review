@@ -399,7 +399,19 @@
 
   // Take the difference between one array and a number of other arrays.
   // Only the elements present in just the first array will remain.
-  _.difference = function(array) {
+  _.difference = function(arr) {
+    let args = [...arguments];
+    let idx;
+    args = args.slice(1);
+    _.each(args, function(array) {
+      _.each(array, function(elem) {
+        if(_.indexOf(arr, elem) !== -1) {
+          idx = _.indexOf(arr, elem);
+          arr.splice(idx, 1);
+        }
+      });
+    });
+    return arr;
   };
 
   // Returns a function, that, when invoked, will only be triggered at most once
