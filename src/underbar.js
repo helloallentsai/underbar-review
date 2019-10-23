@@ -333,7 +333,7 @@
     let copy = array.slice();
     let randomIdx;
 
-    while(copy.length > 0) {
+    while (copy.length > 0) {
       randomIdx = Math.floor(Math.random() * copy.length);
       result.push(copy[randomIdx]);
       copy.splice(randomIdx,1);
@@ -371,9 +371,7 @@
     let args = [...arguments];
     let max = _.reduce(args, (long, arr) => arr.length > long ? long = arr.length : long, 0);
     for (let i = 0; i < max; i++) {
-      let container = [];
-      _.each(args, (element) => element[i] === undefined ? container.push(undefined) : container.push(element[i]));
-      result.push(container);
+      result.push(_.map(args, (element) => element[i]));
     }
     return result;
   };
@@ -384,13 +382,7 @@
   // Hint: Use Array.isArray to check if something is an array
   _.flatten = function(arr) {
     let result = [];
-    _.each(arr, function(elem) {
-      if(Array.isArray(elem)) {
-        result = result.concat(_.flatten(elem));
-      } else {
-        result.push(elem);
-      }
-    });
+    _.each(arr, (elem) => Array.isArray(elem) ? result = result.concat(_.flatten(elem)) : result.push(elem));
     return result;
   };
 
